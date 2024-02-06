@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djangoapp',
     'rest_framework',
-    'firebase_auth'
 ]
 
 MIDDLEWARE = [
@@ -136,8 +135,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'REST_framework.authentication.SessionAuthentication',
-        'firebase_auth.authentication.FirebaseAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'djangoproject.authentication.FirebaseAuthentication',
     ),
 }
