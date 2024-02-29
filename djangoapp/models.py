@@ -10,3 +10,4 @@ class Profile(models.Model):
     email = models.EmailField(null=True, blank=True)
     phone_number = models.CharField(max_length=30,null=True,blank=True)
     
+
