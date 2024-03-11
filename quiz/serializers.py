@@ -48,14 +48,12 @@ class QuizSerializer(serializers.ModelSerializer):
                 print("Quiz not attended")    
                 return False
             
-            
-        
-        
     def get_score(self,obj:Quiz):
         request = self.context.get('request')
         print("quiz id get score : ",obj.id)
         questions = UserAnswers.objects.filter(quiz_id=obj.id,is_correct=True).values_list('is_correct',flat=True)
-        print("questions : ",questions)    
+        print("questions : ",len(questions))    
+        return len(questions)
         
         
 
