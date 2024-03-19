@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'djangoapp',
     'rest_framework',
-    'quiz'
+    'quiz',
+    'exam'
 ]
 
 MIDDLEWARE = [
