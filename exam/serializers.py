@@ -2,8 +2,10 @@
 from rest_framework import serializers
 from django.contrib.postgres.fields import ArrayField
 
+from djangoapp.models import Profile
 from exam.reuse_functions import ReuseFun
-from .models import Exam,Ques,CandidateAnswer
+from .models import Exam,Ques,CandidateAnswer,Scores
+
 
 class CreateExamSerializer(serializers.Serializer):
     category_name = serializers.CharField(max_length=100,required=True)
@@ -32,31 +34,11 @@ class GetSubcategoryExamSerializer(serializers.ModelSerializer):
             return ReuseFun().is_attended(request.user.id,obj.id)
     
                     
+                    
     def get_score(self,obj:Exam):
         request = self.context.get('request')
         print("score : ",request)
-        questions = CandidateAnswer.objects.filter(user_id=request.user.id,exam_id=obj.id).values_list('is_correct',flat=True)
-        print("questiooo : ",questions)        
-        total_questions = len(questions)
-        correct_questions = 0
-        wrong_questions = 0
-        unattended_questions = 0
-        negative_mark = 0
-        total_mark = 0
-        for val in questions:
-            if val == True:
-               correct_questions += 1
-            elif val == False:
-                wrong_questions += 1
-            else:
-                unattended_questions += 1
-        
-        negative_mark = 0.66 * wrong_questions
-        print("tot:",total_questions," corr:",correct_questions," wrong :",wrong_questions," unatt:",unattended_questions)
-        print("negative mark : ",negative_mark)
-        total_mark = correct_questions - negative_mark
-        print("total mark : ",total_mark)
-        return total_mark
+        return ReuseFun.get_score(request.user.id,obj.id)
         
         
 class GetExamSerializer(serializers.Serializer):
@@ -81,9 +63,6 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ques
         fields = ('question', 'answers', 'correct_option','your_answer')
-        
-   
-            
         
     def to_representation(self, instance):
         data =  super().to_representation(instance)   
@@ -115,15 +94,10 @@ class QuestionSerializer(serializers.ModelSerializer):
             return your_ans
         else :
             return None
-    
-    
         
-        
-
 class ExamDetailSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True,source='ques_set')
     is_attended = serializers.SerializerMethodField()
-    
 
     class Meta:
         model = Exam
@@ -136,11 +110,33 @@ class ExamDetailSerializer(serializers.ModelSerializer):
         else:
             return ReuseFun().is_attended(request.user.id,obj.id)
         
-   
-        
+
+      
 class SubmitAnswerSerializer(serializers.Serializer):
     exam_id = serializers.IntegerField(required = True)
     answers = serializers.ListField(child=serializers.CharField(),required=False)
     
+
+class ScoreBoardSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
     
     
+    class Meta:
+        model = Scores
+        fields = ['score','name']
+        
+    def get_name(self,obj):
+        request = self.context.get('request')
+        if request is None:
+            
+            return None
+        else :
+            name = Profile.objects.get(user_id=obj.user_id).username
+            print("profile tab : ",name,":::::objjj:", obj.user_id)
+            return name
+    
+    # {
+    #     "rank":1,
+    #     "name": "dd",
+    #     "Score":5,
+    # }

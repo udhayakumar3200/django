@@ -50,7 +50,7 @@ class CandidateAnswer(models.Model):
 class Scores(models.Model):
     user = models.ForeignKey(User,on_delete = models.CASCADE)
     exam = models.ForeignKey(Exam,on_delete=models.CASCADE,null=True)
-    score = models.FloatField(null=False,default = 0.0)
+    score = models.FloatField(null=True)
     
     class Meta:
         db_table = "Scores"

@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from exam.reuse_functions import ReuseFun
-from .models import Ques,Category,SubCategory,Exam,CandidateAnswer
-from .serializers import CreateExamSerializer,GetSubcategoryExamSerializer,SubmitAnswerSerializer,ExamDetailSerializer
+from .models import Ques,Category,SubCategory,Exam,CandidateAnswer,Scores
+from .serializers import CreateExamSerializer,GetSubcategoryExamSerializer,SubmitAnswerSerializer,ExamDetailSerializer,ScoreBoardSerializer
 
 class ExamApi(ModelViewSet):
     serializer_class = GetSubcategoryExamSerializer
@@ -113,6 +113,10 @@ class GetExamApi(APIView):
 
                 CandidateAnswer.objects.bulk_create(data)
                 total_mark = ReuseFun.get_score(request.user.id,exam_id)
+                # print("test : ",Exam.objects.get(id=exam_id),":::",total_mark,":::",request.user.id)
+                # score_data = Scores(user=request.user,exam=Exam.objects.get(id=exam_id),score=total_mark)
+                # print("score data: ",score_data)
+                Scores.objects.create(user=request.user,exam=Exam.objects.get(id=exam_id),score=total_mark)
                 data = {
                     "test":"Submitted successfully",
                     "socre":total_mark
@@ -145,4 +149,16 @@ class ExamEnum(APIView):
             objects.append(category_data)
         print("final object : ",objects)
         return Response(objects,status=status.HTTP_200_OK)
+    
+class ScoreBoardApi(APIView):
+    def get(self,request:Request,format=None):
+        examId = self.request.GET.get('exam_id')
+        data = []
+        print("self : ",examId)
+        obj = Scores.objects.filter(exam_id = examId).order_by('-score')
+        print("score : ",obj)
+        serializer = ScoreBoardSerializer(obj,many=True,context={'request':request})
+        print("Serializer data : ",serializer.data)
+        return Response(serializer.data,status=status.HTTP_200_OK)
+            
     
